@@ -9,7 +9,7 @@ const startWebServer = () => {
         const port = 8000;
         const app = express();
 
-        const server = app.listen(8000, () => {
+        const server = app.listen(process.env.PORT, () => {
             console.log("Server has started");
         });
 
