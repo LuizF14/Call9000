@@ -3,7 +3,7 @@ const venom = require('venom-bot');
 
 module.exports = async (command) => {
     try {
-        const client = await venom.create(//session
+        const client = await venom.create(
             'sessionName', 
             (base64Qrimg, asciiQR, attempts, urlCode) => {
               console.log('Number of attempts to read the qrcode: ', attempts);
