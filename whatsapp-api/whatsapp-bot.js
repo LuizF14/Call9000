@@ -20,13 +20,10 @@ module.exports = async (command) => {
             },
             // options
             {
-                headless: true,
-                puppeteerOptions: {
-                    'args' : [
+                browserArgs: [
                     '--no-sandbox'
-                  ]
-              }
-            },);
+                ]
+            });
         client.onMessage(async message => {
             if(message.body === command) {
                 const response = await getNextClass();
