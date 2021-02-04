@@ -3,7 +3,14 @@ const venom = require('venom-bot');
 
 module.exports = async (command) => {
     try {
-        const client = await venom.create();
+        const client = await venom.create({
+            puppeteerOptions: {
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                  ],
+            }
+        });
         client.onMessage(async message => {
             if(message.body === command) {
                 const response = await getNextClass();
