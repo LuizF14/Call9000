@@ -9,6 +9,8 @@
   "author": "Luiz Felipe",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
+    "googleapis": "^67.0.0",
     "venom-bot": "^2.2.3"
   }
 }

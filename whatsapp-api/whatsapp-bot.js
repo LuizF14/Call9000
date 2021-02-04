@@ -1,16 +1,16 @@
+const { getNextClass } = require('../google-api/google-calendar');
 const venom = require('venom-bot');
 
-const whatsappBot = async () => {
+module.exports = async (command) => {
     try {
         const client = await venom.create();
         client.onMessage(async message => {
-            if(message.body === '/help') {
-                const result = await client.sendText(message.from, 'n');
+            if(message.body === command) {
+                const response = await getNextClass();
+                const result = await client.sendText(message.from, response);
             }
         });
     } catch (error) {
         console.log(error);
     }
 }
-
-whatsappBot();
