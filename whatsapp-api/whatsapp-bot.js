@@ -18,7 +18,8 @@ module.exports = async (command) => {
             {
                 puppeteerOptions: {
                     args: [
-                        '--no-sandbox'
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox'
                     ]
                 },
             }
