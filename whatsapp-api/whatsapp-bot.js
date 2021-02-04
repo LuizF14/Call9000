@@ -20,10 +20,10 @@ module.exports = async (command) => {
             },
             // options
             {
-              puppeteerOptions: {
+                headless: true,
+                puppeteerOptions: {
                     'args' : [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox'
+                    '--no-sandbox'
                   ]
               }
             },);
