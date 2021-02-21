@@ -12,7 +12,6 @@
     "cheerio": "^1.0.0-rc.5",
     "express": "^4.17.1",
     "googleapis": "^67.0.0",
-    "twilio": "^3.55.1",
-    "venom-bot": "^2.2.3"
+    "twilio": "^3.55.1"
   }
 }
