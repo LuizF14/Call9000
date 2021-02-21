@@ -1,15 +1,22 @@
+// Third party modules
 const { google } = require('googleapis');
 const calendar = google.calendar({ version: "v3" });
 const OAuth2 = google.auth.OAuth2;
 const express = require('express');
+const cheerio = require('cheerio');
+// Node modules
+const fs = require('fs');
+// File modules
 const credentials = require('./credentials/client_secret_412682980021-en76tm1sjgjpk6pr9halgmeml1aa9ge9.apps.googleusercontent.com.json');
+
+const TOKEN_PATH = `${__dirname}/credentials/token.json`;
 
 const startWebServer = () => {
     return new Promise((resolve, reject) => {
         const port = 8000;
         const app = express();
 
-        const server = app.listen(process.env.PORT, () => {
+        const server = app.listen(8000, () => {
             console.log("Server has started");
         });
 
@@ -57,9 +64,7 @@ const requestGoogleForAccessTokens = async (OAuthClient, authoriazationToken) =>
         OAuthClient.getToken(authoriazationToken, (err, token) => {
             if(err) return reject(err);
             console.log('Access token received');
-
-            OAuthClient.setCredentials(token);
-            resolve();
+            resolve(token);
         });
     });
 }
@@ -76,34 +81,65 @@ const stopWebServer = (webServer) => {
     });
 }
 
+const getAccessToken = async (OAuthClient, webServer) => {
+    requestUserConsent(OAuthClient);
+    const authoriazationToken = await waitForGoogleCallback(webServer);
+    const token = await requestGoogleForAccessTokens(OAuthClient, authoriazationToken);
+    OAuthClient.setCredentials(token);
+    fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+        if (err) return console.error(err);
+        console.log('Token stored to', TOKEN_PATH);
+    });
+}
+
 const authenticateWithOAuth = async () => {
     const webServer = await startWebServer();
     const OAuthClient = await createOAuthClient();
-    requestUserConsent(OAuthClient);
-    const authoriazationToken = await waitForGoogleCallback(webServer);
-    await requestGoogleForAccessTokens(OAuthClient, authoriazationToken);
+    // fs.readFile(TOKEN_PATH, async (err, token) => {
+    //     if(err) {
+    //         await getAccessToken(OAuthClient, webServer);
+    //     } else {
+    //         OAuthClient.setCredentials(JSON.parse(token));
+    //     }
+    //     await setGlobalGoogleAuthentication(OAuthClient);
+    //     await stopWebServer(webServer);
+    // });
+    try{
+        const token = require('./credentials/token.json');
+        OAuthClient.setCredentials(token);
+    } catch(err) {
+        await getAccessToken(OAuthClient, webServer);
+    }
     await setGlobalGoogleAuthentication(OAuthClient);
     await stopWebServer(webServer);
 }
 
 const getNextClass = async () => {
     return new Promise((resolve, reject) => {
-        let returnLink;
+        const returnObj = {};
+
+        const lagTime = 5 * 60 * 1000;
     
         calendar.events.list({
             calendarId: '3fn4hbhlko8vr5r6bhd0a48hb8@group.calendar.google.com',
-            maxResults: 20,
             orderBy: 'startTime',
             singleEvents: true
         }, (err, res) => {
             if(err) return console.log(err);
-            const nextEvent = res.data.items.filter(el => new Date(el.start.dateTime).getTime() > Date.now())[0];
+            const nextEvent = res.data.items.filter(el => new Date(el.start.dateTime).getTime() - lagTime > Date.now())[0];
+            returnObj.startDate = new Date(nextEvent.start.dateTime).getTime() - lagTime;
             if(nextEvent.hangoutLink) {
-                returnLink = nextEvent.hangoutLink
-            } else {
-                returnLink = nextEvent.description;
-            };
-            resolve(returnLink);
+                returnObj.link = nextEvent.hangoutLink;
+            } else{
+                const $ = cheerio.load(nextEvent.description);
+                returnObj.link = $('html *').contents().map(function() {
+                    return (this.type === 'text') ? $(this).text()+' ' : '';
+                }).get().join('');
+            }
+
+            console.log(returnObj.link);
+            // console.log(returnObj);
+            resolve(returnObj);
         });
 
     });

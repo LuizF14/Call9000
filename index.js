@@ -3,7 +3,7 @@ const {authenticateWithOAuth} = require('./google-api/google-calendar');
 
 const classBot = async () => {
     await authenticateWithOAuth();
-    await whatsappBot('Pls link');
+    await whatsappBot();
 }
 
 classBot();
