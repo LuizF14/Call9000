@@ -7,9 +7,9 @@ const cheerio = require('cheerio');
 // Node modules
 const fs = require('fs');
 // File modules
-const credentials = require('./credentials/client_secret_412682980021-en76tm1sjgjpk6pr9halgmeml1aa9ge9.apps.googleusercontent.com.json');
+const credentials = require('../credentials/client_secret_523885872434-81e5l20m3ci581khud6c99812i40326d.apps.googleusercontent.com.json');
 
-const TOKEN_PATH = `${__dirname}/credentials/token.json`;
+const TOKEN_PATH = `${__dirname}/../credentials/token.json`;
 
 const startWebServer = () => {
     return new Promise((resolve, reject) => {
@@ -105,7 +105,7 @@ const authenticateWithOAuth = async () => {
     //     await stopWebServer(webServer);
     // });
     try{
-        const token = require('./credentials/token.json');
+        const token = require('../credentials/token.json');
         OAuthClient.setCredentials(token);
     } catch(err) {
         await getAccessToken(OAuthClient, webServer);
@@ -136,8 +136,6 @@ const getNextClass = async () => {
                     return (this.type === 'text') ? $(this).text()+' ' : '';
                 }).get().join('');
             }
-
-            console.log(returnObj.link);
             // console.log(returnObj);
             resolve(returnObj);
         });
