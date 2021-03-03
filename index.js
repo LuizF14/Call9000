@@ -1,20 +1,26 @@
 // Third party modules
 const dotenv = require('dotenv');
 
-// File modules
-const EasyDiscord = require('./utils/easy-discord');
-const classRoutes = require('./routes/class-routes');
-
 dotenv.config({
     path: './config.env'
 });
 
-const bot = new EasyDiscord(process.env.DISCORD_TOKEN);
+// File modules
+const bot = require('./bot');
+const app = require('./server');
+const {authenticateWithOAuth} = require('./models/google-calendar');
 
-bot.setPrefix(',');
+const init = async () => {
+    app.listen(8000, () => {
+        console.log('Server has started');
+    });
+    
+    await authenticateWithOAuth();
 
-bot.extractRoutes(classRoutes);
+    bot.listen(() => {
+        console.log('Bot has started');
+    });
+}
 
-bot.listen(() => {
-    console.log('Bot has started');
-});
+init();
+

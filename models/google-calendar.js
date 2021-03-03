@@ -2,30 +2,14 @@
 const { google } = require('googleapis');
 const calendar = google.calendar({ version: "v3" });
 const OAuth2 = google.auth.OAuth2;
-const express = require('express');
 const cheerio = require('cheerio');
 // Node modules
 const fs = require('fs');
 // File modules
+const app = require('../server');
 const credentials = require('../credentials/client_secret_523885872434-81e5l20m3ci581khud6c99812i40326d.apps.googleusercontent.com.json');
 
 const TOKEN_PATH = `${__dirname}/../credentials/token.json`;
-
-const startWebServer = () => {
-    return new Promise((resolve, reject) => {
-        const port = 8000;
-        const app = express();
-
-        const server = app.listen(8000, () => {
-            console.log("Server has started");
-        });
-
-        resolve({
-            app,
-            server
-        });
-    });
-}
 
 const createOAuthClient = async () => {
     const OAuthClient = new OAuth2(
@@ -46,11 +30,11 @@ const requestUserConsent = (OAuthClient) => {
     console.log(`Please give your consent: ${consentUrl}`);
 }
 
-const waitForGoogleCallback = async (webServer) => {
+const waitForGoogleCallback = async (app) => {
     return new Promise((resolve, reject) =>  {
         console.log('Waiting for your consent');
 
-         webServer.app.get('/oauth2/callback/', (req, res) => {
+         app.get('/oauth2/callback/', (req, res) => {
              const authCode = req.query.code;
              console.log(`Consent given: ${authCode}`);
              res.send('<h1>Thank you</h1>');
@@ -75,15 +59,9 @@ const setGlobalGoogleAuthentication = (OAuthClient) => {
     });
 }
 
-const stopWebServer = (webServer) => {
-    return new Promise((resolve, reject) => {
-        webServer.server.close(() => { resolve() });
-    });
-}
-
-const getAccessToken = async (OAuthClient, webServer) => {
+const getAccessToken = async (OAuthClient, app) => {
     requestUserConsent(OAuthClient);
-    const authoriazationToken = await waitForGoogleCallback(webServer);
+    const authoriazationToken = await waitForGoogleCallback(app);
     const token = await requestGoogleForAccessTokens(OAuthClient, authoriazationToken);
     OAuthClient.setCredentials(token);
     fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
@@ -93,25 +71,14 @@ const getAccessToken = async (OAuthClient, webServer) => {
 }
 
 const authenticateWithOAuth = async () => {
-    const webServer = await startWebServer();
     const OAuthClient = await createOAuthClient();
-    // fs.readFile(TOKEN_PATH, async (err, token) => {
-    //     if(err) {
-    //         await getAccessToken(OAuthClient, webServer);
-    //     } else {
-    //         OAuthClient.setCredentials(JSON.parse(token));
-    //     }
-    //     await setGlobalGoogleAuthentication(OAuthClient);
-    //     await stopWebServer(webServer);
-    // });
     try{
         const token = require('../credentials/token.json');
         OAuthClient.setCredentials(token);
     } catch(err) {
-        await getAccessToken(OAuthClient, webServer);
+        await getAccessToken(OAuthClient, app);
     }
     await setGlobalGoogleAuthentication(OAuthClient);
-    await stopWebServer(webServer);
 }
 
 const getNextClass = async () => {
@@ -136,7 +103,6 @@ const getNextClass = async () => {
                     return (this.type === 'text') ? $(this).text()+' ' : '';
                 }).get().join('');
             }
-            // console.log(returnObj);
             resolve(returnObj);
         });
 

@@ -1,11 +1,7 @@
 const EasyDiscord = require('../utils/easy-discord');
-const {authenticateWithOAuth, getNextClass} = require('../models/google-calendar');
 const router = new EasyDiscord();
+const {getLink} = require('../controllers/class-controllers');
 
-router.command('next class', async (msg) => {
-    await authenticateWithOAuth();
-    const nextClass = await getNextClass();
-    msg.reply(nextClass.link);
-});
+router.command('next class', getLink);
 
 module.exports = router;
