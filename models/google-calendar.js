@@ -7,7 +7,7 @@ const cheerio = require('cheerio');
 const fs = require('fs');
 // File modules
 const app = require('../server');
-const credentials = require('../credentials/client_secret_523885872434-81e5l20m3ci581khud6c99812i40326d.apps.googleusercontent.com.json');
+const credentials = require(process.env.CREDENTIALS_PATH);
 
 const TOKEN_PATH = `${__dirname}/../credentials/token.json`;
 
@@ -88,7 +88,7 @@ const getNextClass = async () => {
         const lagTime = 5 * 60 * 1000;
     
         calendar.events.list({
-            calendarId: '3fn4hbhlko8vr5r6bhd0a48hb8@group.calendar.google.com',
+            calendarId: process.env.CALENDAR_ID,
             orderBy: 'startTime',
             singleEvents: true
         }, (err, res) => {
