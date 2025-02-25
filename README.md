@@ -32,6 +32,8 @@ npm start
 A message will appear in the terminal, prompting you to access a link to grant permission for the bot to access your Google Calendar data. After completing this step, the bot will begin running.
  
 To add the bot to your server, create an invitation link in the Discord Developer Portal with the necessary permissions to send messages. Then, open this link in your browser, select the server you want to add the bot to, and authorize the action.
+ 
+If you type on `,next class` on the server, the bot will return you the link to the next video conference room.
 
 ## Built With
 * Node.js
